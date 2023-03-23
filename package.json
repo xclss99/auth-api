@@ -1,7 +1,7 @@
 {
-  "name": "express-typeorm-starter",
-  "version": "1.0.0",
-  "description": "A starter with Express + TypeORM + RoutingControllers + MariaDB",
+  "name": "auth-api",
+  "version": "0.0.1",
+  "description": "An auth api service with Express + TypeORM + RoutingControllers + MariaDB",
   "main": "dist/main.js",
   "author": {
     "name": "xclss99",

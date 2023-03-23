@@ -1,6 +1,6 @@
-# Express TypeORM Starter
+# Auth API
 
-TypeScript + Express + TypeORM + RoutingControllers + MySQL
+An auth api service with Express + TypeORM + RoutingControllers + MariaDB
 
 ## Project Setup
 
