@@ -8,7 +8,7 @@ import {
 
 export abstract class Base extends BaseEntity {
   /** 自增id */
-  @PrimaryGeneratedColumn({ comment: '自增id' })
+  @PrimaryGeneratedColumn('increment', { comment: '自增id' })
   id: number
 
   /** 更新时间 */
