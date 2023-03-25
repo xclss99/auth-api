@@ -1,24 +1,33 @@
-import express, { json, urlencoded } from 'express'
-import cors from 'cors'
+import express from 'express'
 import { NODE_ENV, PORT, DB_PORT, dataSource } from '~/configs'
 import { logger } from '~/utils'
-import { useExpressServer } from 'routing-controllers'
-import { errorMiddleware } from '~/middlewares'
+import { createExpressServer } from 'routing-controllers'
+import { errorMiddleware, httpMiddleware } from '~/middlewares'
 
 class App {
-  public app: express.Application
-  public env: string
-  public port: string | number
+  private app: express.Application
+  private env: string
+  private port: string | number
 
   constructor(controllers: Function[]) {
-    this.app = express()
+    this.app = createExpressServer({
+      cors: true,
+      controllers,
+      defaultErrorHandler: false
+    })
     this.env = NODE_ENV || 'development'
-    this.port = PORT || 3300
+    this.port = PORT || 3000
 
-    this.initDB()
-    this.initMiddlewares()
-    this.initRoutes(controllers)
-    this.initErrorHandling()
+    this.app.all('*', (_req, res, next) => {
+      if (res.statusMessage === undefined) {
+        res.statusCode = 404
+        res.statusMessage = '404 not found'
+      }
+      next()
+    })
+
+    this.initDataSource()
+    this.initErrorHandler()
   }
 
   public listen() {
@@ -34,7 +43,7 @@ class App {
     return this.app
   }
 
-  private initDB() {
+  private initDataSource() {
     dataSource
       .initialize()
       .then(() => {
@@ -46,22 +55,8 @@ class App {
       })
   }
 
-  private initMiddlewares() {
-    // 配置跨域代理
-    this.app.use(cors())
-    // 请求解析
-    this.app.use(json())
-    this.app.use(urlencoded({ extended: true }))
-  }
-
-  private initRoutes(controllers: Function[]) {
-    useExpressServer(this.app, {
-      controllers,
-      defaultErrorHandler: false
-    })
-  }
-
-  private initErrorHandling() {
+  private initErrorHandler() {
+    this.app.use(httpMiddleware)
     this.app.use(errorMiddleware)
   }
 }

@@ -1,6 +1,6 @@
-interface UserLoginBo {
+interface LoginBo {
   id: number
   mobile: string
   username: string
-  token: string
+  tokenData: Http.TokenData
 }

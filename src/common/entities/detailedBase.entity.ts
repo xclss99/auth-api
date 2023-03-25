@@ -12,12 +12,12 @@ export abstract class DetailedBase extends BaseEntity {
   @PrimaryGeneratedColumn('increment', { comment: '自增id' })
   id: number
 
-  /** 创建人id */
-  @Column({ comment: '创建人id' })
+  /** 创建人id, 0代表数据库自动生成的 */
+  @Column({ default: 0, comment: '创建人id, 0代表数据库自动生成的' })
   creatorId: number
 
   /** 更新人id */
-  @Column({ comment: '更新人id' })
+  @Column({ default: 0, comment: '更新人id, 0代表数据库自动生成的' })
   updaterId: number
 
   /** 创建时间 */

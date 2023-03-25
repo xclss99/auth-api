@@ -1,0 +1,3 @@
+interface SignUpBo {
+  id: number
+}
