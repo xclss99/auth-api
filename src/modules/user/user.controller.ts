@@ -2,7 +2,6 @@ import { JsonController, Get, Post, Param, Body, UseBefore, Req } from 'routing-
 import { UserService } from './user.service'
 import { AuthMiddleware } from '~/middlewares'
 import { logger } from '@/common/utils'
-import { UserEntity } from './entities/user.entity'
 
 @JsonController()
 export class UserController {
