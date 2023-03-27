@@ -1,5 +1,4 @@
-import { User } from './entities/user.entity'
-// import { Repository } from 'typeorm'
+import { UserEntity } from './entities/user.entity'
 import { isEmpty } from 'class-validator'
 import { compareSync, hashSync } from 'bcryptjs'
 import { AccountType } from '~/enum'
@@ -16,7 +15,6 @@ import {
   WrongPasswordException,
   WrongVerifyCodeException
 } from '~/exceptions'
-import { Response } from 'express'
 
 export class UserService {
   async signUp({ mobile, username, password }: SignUpDto): Promise<SignUpBo> {
@@ -29,13 +27,13 @@ export class UserService {
     }
     await checkValidPassword(password)
     const hashedPassword = hashSync(password)
-    const { id } = await User.create({ mobile, username, password: hashedPassword }).save()
+    const { id } = await UserEntity.create({ mobile, username, password: hashedPassword }).save()
     logger.info(`A new user with mobile '${mobile}' signed up, with id '${id}'`)
     return { id }
   }
 
   async passwordLogin({ accountType, account, password }: PasswordLoginDto): Promise<LoginBo> {
-    let user: User
+    let user: UserEntity
     if (accountType === AccountType.mobile) {
       user = await this.findByMobile(account)
     } else {
@@ -57,7 +55,7 @@ export class UserService {
   }
 
   async verifyCodeLogin({ accountType, account, verifyCode }: VerifyLoginDto): Promise<LoginBo> {
-    let user: User
+    let user: UserEntity
     if (accountType === AccountType.mobile) {
       user = await this.findByMobile(account)
     } else {
@@ -83,6 +81,43 @@ export class UserService {
     await this.findById(id)
   }
 
+  async findUserInfo(field: UserKeyField, value: string): Promise<User | null> {
+    const userEntity = await UserEntity.createQueryBuilder('u')
+      .where(`u.${field} = :value AND u.isDelete = '0'`, { value })
+      .getOne()
+    if (userEntity) {
+      const { id, mobile, username, sex, avatar, profile, signUpTime } = userEntity
+      return {
+        id,
+        mobile,
+        username,
+        sex,
+        avatar,
+        profile,
+        signUpTime
+      }
+    }
+    return userEntity
+  }
+
+  async updateUserInfo(id: number, { mobile, username, avatar, profile, sex }: UpdateUserInfoDto) {
+    const user = await this.findById(id)
+    console.log(mobile, username, avatar, profile, sex)
+    user.save()
+    logger.info(`User with id '${id}' updated`)
+  }
+
+  async updatePassword(id: number, { oldPassword, newPassword }: UpdatePasswordDto) {
+    const user = await this.findById(id)
+    if (!compareSync(oldPassword, user.password)) {
+      throw new WrongPasswordException()
+    }
+    await checkValidPassword(newPassword)
+    user.password = hashSync(newPassword)
+    user.save()
+    logger.info(`User with id '${id}' updated password`)
+  }
+
   // async verifyCodeLogin(): Promise<LoginBo> {
   //   return {
   //     id,
@@ -92,29 +127,29 @@ export class UserService {
   //   }
   // }
 
-  private async checkExistsById(id: number) {
-    const user = await User.findOneBy({ id, isDelete: false })
-    if (user) {
-      throw new EntityAlreadyExistsException('User', 'id', String(id))
-    }
-  }
+  // private async checkExistsById(id: number) {
+  //   const user = await UserEntity.findOneBy({ id, isDelete: false })
+  //   if (user) {
+  //     throw new EntityAlreadyExistsException('User', 'id', String(id))
+  //   }
+  // }
 
   private async checkExistsByMobile(mobile: string) {
-    const user = await User.findOneBy({ mobile, isDelete: false })
+    const user = await UserEntity.findOneBy({ mobile, isDelete: false })
     if (user) {
       throw new EntityAlreadyExistsException('User', 'mobile', mobile)
     }
   }
 
   private async checkExistsByUsername(username: string) {
-    const user = await User.findOneBy({ username, isDelete: false })
+    const user = await UserEntity.findOneBy({ username, isDelete: false })
     if (user) {
       throw new EntityAlreadyExistsException('User', 'username', username)
     }
   }
 
   private async findById(id: number, entityName = 'User') {
-    const user = await User.findOneBy({ id, isDelete: false })
+    const user = await UserEntity.findOneBy({ id, isDelete: false })
     if (!user) {
       throw new EntityNotFoundException(entityName, 'id', String(id))
     }
@@ -122,7 +157,7 @@ export class UserService {
   }
 
   private async findByMobile(mobile: string) {
-    const user = await User.findOneBy({ mobile, isDelete: false })
+    const user = await UserEntity.findOneBy({ mobile, isDelete: false })
     if (!user) {
       throw new EntityNotFoundException('User', 'mobile', mobile)
     }
@@ -130,7 +165,7 @@ export class UserService {
   }
 
   private async findByUsername(username: string) {
-    const user = await User.findOneBy({ username, isDelete: false })
+    const user = await UserEntity.findOneBy({ username, isDelete: false })
     if (!user) {
       throw new EntityNotFoundException('User', 'username', username)
     }

@@ -1,4 +1,4 @@
-import { User } from '@/modules/user'
+import { UserEntity } from '@/modules/user'
 import { NextFunction, Response } from 'express'
 import { verify } from 'jsonwebtoken'
 import { SECRET_KEY } from '~/configs'
@@ -20,10 +20,9 @@ export const AuthMiddleware = async (
 ) => {
   try {
     const token = getToken(req)
-
     if (token) {
       const { id } = verify(token, SECRET_KEY || 'auth-secret') as Http.TokenPayload
-      const user = await User.findOneBy({ id })
+      const user = await UserEntity.findOneBy({ id })
       if (user) {
         req.id = user.id
         req.mobile = user.mobile
@@ -35,6 +34,7 @@ export const AuthMiddleware = async (
       next(new HttpException({ message: 'Authentication token missing' }, HttpStatus.Unauthorized))
     }
   } catch (error) {
-    next(new HttpException({ message: 'Wrong authentication token' }, HttpStatus.Unauthorized))
+    const message = `Wrong authentication token, ${error}`
+    next(new HttpException({ message }, HttpStatus.Unauthorized))
   }
 }

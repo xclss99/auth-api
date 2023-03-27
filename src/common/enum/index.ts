@@ -20,3 +20,9 @@ export enum AccountType {
   mobile,
   username
 }
+
+export enum Sex {
+  man,
+  woman,
+  secret
+}

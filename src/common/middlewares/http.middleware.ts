@@ -1,16 +1,20 @@
 import { NextFunction, Request, Response } from 'express'
-import { logger, getClientIp } from '~/utils'
+import { logger, getClientIp, httpLogFormat } from '~/utils'
 
-export const httpMiddleware = (
-  req: Request,
-  res: Response<Http.ResponseBody>,
-  next: NextFunction
-) => {
+export const httpMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const ip = getClientIp(req)
   const { statusCode, statusMessage } = res
-  const logContent = `(${ip})<${req.headers['user-agent']}>[${req.method}] ${req.path} => StatusCode: ${statusCode} Message: ${statusMessage}`
+  const { headers, method, path } = req
+  const logContent = httpLogFormat(
+    String(ip),
+    headers['user-agent'] || '',
+    method,
+    path,
+    statusCode,
+    statusMessage
+  )
   if (statusCode === 200) {
-    logger.http(logContent)
+    logger.info(logContent)
   } else {
     logger.warn(logContent)
   }

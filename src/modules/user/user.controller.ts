@@ -1,8 +1,8 @@
-import { JsonController, Post, Body, UseBefore, Req, Res } from 'routing-controllers'
-import { Response } from 'express'
+import { JsonController, Get, Post, Param, Body, UseBefore, Req } from 'routing-controllers'
 import { UserService } from './user.service'
 import { AuthMiddleware } from '~/middlewares'
 import { logger } from '@/common/utils'
+import { UserEntity } from './entities/user.entity'
 
 @JsonController()
 export class UserController {
@@ -15,7 +15,7 @@ export class UserController {
     const data: SignUpBo = await this.userService.signUp(signUpDto)
     return {
       data,
-      message: 'Sign up successfully!'
+      message: 'sign up successfully'
     }
   }
 
@@ -24,7 +24,7 @@ export class UserController {
     const data: LoginBo = await this.userService.passwordLogin(loginDto)
     return {
       data,
-      message: 'Login successfully!'
+      message: 'login successfully'
     }
   }
 
@@ -33,7 +33,7 @@ export class UserController {
     const data: LoginBo = await this.userService.verifyCodeLogin(loginDto)
     return {
       data,
-      message: 'Login successfully!'
+      message: 'login successfully'
     }
   }
 
@@ -41,10 +41,49 @@ export class UserController {
   @UseBefore(AuthMiddleware)
   async logout(@Req() req: Http.RequestWithUser): Promise<Http.ResponseBody> {
     const { id } = req
-    // await this.userService.logout(id)
     logger.info(`user logout with ${id}`)
     return {
-      message: 'Logout'
+      message: 'logout successfully'
+    }
+  }
+
+  @Get('/user/:field/:value')
+  @UseBefore(AuthMiddleware)
+  async findUser(
+    @Param('field') field: UserKeyField,
+    @Param('value') value: string
+  ): Promise<Http.ResponseBody<User | null>> {
+    const data = await this.userService.findUserInfo(field, value)
+    const message = data ? 'find successfully' : 'user not found'
+    return {
+      data,
+      message
+    }
+  }
+
+  @Post('/user')
+  @UseBefore(AuthMiddleware)
+  async updateUser(
+    @Req() req: Http.RequestWithUser,
+    @Body() updateUserInfoDto: UpdateUserInfoDto
+  ): Promise<Http.ResponseBody> {
+    const { id } = req
+    await this.userService.updateUserInfo(id, updateUserInfoDto)
+    return {
+      message: 'password updated'
+    }
+  }
+
+  @Post('/password')
+  @UseBefore(AuthMiddleware)
+  async updatePassword(
+    @Req() req: Http.RequestWithUser,
+    @Body() updatePasswordDto: UpdatePasswordDto
+  ): Promise<Http.ResponseBody> {
+    const { id } = req
+    await this.userService.updatePassword(id, updatePasswordDto)
+    return {
+      message: 'password updated'
     }
   }
 }

@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import winston from 'winston'
 import winstonDaily from 'winston-daily-rotate-file'
-import { LOG_DIR } from '~/configs/env'
+import { LOG_DIR } from '~/configs'
 
 // logs dir
 const logDir: string = join(__dirname, String(LOG_DIR))
@@ -64,4 +64,18 @@ const stream = {
   }
 }
 
-export { logger, stream }
+const httpLogFormat = (
+  ip: string,
+  userAgent: string,
+  method: string,
+  path: string,
+  status: number,
+  message: string,
+  errorCode?: number
+) => {
+  return `[${ip}] [${userAgent}] [${method}] (${path}) => status: ${status}, ${
+    errorCode ? `errorCode: ${errorCode} ` : ''
+  }message: ${message}`
+}
+
+export { logger, stream, httpLogFormat }

@@ -18,4 +18,8 @@ declare namespace Http {
     id: number
     mobile: string
   }
+  type Response = import('express').Response
+  interface ResponseWithBody extends Response {
+    body: ResponseBody
+  }
 }
