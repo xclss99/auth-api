@@ -21,6 +21,7 @@ export enum AccountType {
   username
 }
 
+/** 用户性别 (man: 0, woman: 1, secret: 2 */
 export enum Sex {
   man,
   woman,

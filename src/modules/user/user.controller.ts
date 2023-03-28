@@ -51,7 +51,7 @@ export class UserController {
   async findUser(
     @Param('field') field: UserKeyField,
     @Param('value') value: string
-  ): Promise<Http.ResponseBody<User | null>> {
+  ): Promise<Http.ResponseBody<UserInfoBo | null>> {
     const data = await this.userService.findUserInfo(field, value)
     const message = data ? 'find successfully' : 'user not found'
     return {

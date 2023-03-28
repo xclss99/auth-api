@@ -81,7 +81,7 @@ export class UserService {
     await this.findById(id)
   }
 
-  async findUserInfo(field: UserKeyField, value: string): Promise<User | null> {
+  async findUserInfo(field: UserKeyField, value: string): Promise<UserInfoBo | null> {
     const userEntity = await UserEntity.createQueryBuilder('u')
       .where(`u.${field} = :value AND u.isDelete = '0'`, { value })
       .getOne()
